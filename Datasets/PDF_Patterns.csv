@@ -1,8 +1,0 @@
-Pattern_1,Pattern_2,Pattern_3,Pattern_4,Pattern_5,Pattern_6,Pattern_7,Pattern_8,Pattern_9,Pattern_10,Matches
-statement,status,id,closure,,,,,,,1
-statement,context,status,risk,id,closure,,,,,1
-development,testing,delay,telework,impacts,schedule,Procurement,,,,1
-Covid-19, restrictions,modeling,pathways,,,,,,,1
-Technical ,Challeng,Flight,Unit,Flight ,Units,,,,,1
-Technical,Challeng,technical,risk,flight,certification,overlap,certification,,,1
-challenge,tradeoff,expense,complexity,consuming,time,deliver,customer,,,1
