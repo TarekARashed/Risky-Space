@@ -6,11 +6,14 @@ import numpy as np
 from csv import reader
 from sklearn.model_selection import train_test_split
 import os
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer, TfidfTransformer
+import pickle
+
 
 # load the dataset
 Current_Directory = os.getcwd()
 TFIDF_Features_Path=os.path.join(Current_Directory, "TFIDF_Features", "")
+TFIDF_Model_Path=os.path.join(Current_Directory, "TFIDF_Features", "TF_IDF_feature.pkl")
 TFidf_Data_Feautres=Path(TFIDF_Features_Path, 'tf_idf').with_suffix('.csv')
 Tfidf_data = pd.read_csv(TFidf_Data_Feautres, header = None)
 
@@ -57,19 +60,36 @@ X = Tfidf_data
 Y = tfidf_class
 print(X.shape, Y.shape)
 X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=0)
+
+
+
 model = Sequential()
-model.add(Dense(100, input_dim=600, activation='relu'))
-model.add(Dense(8, activation='relu'))
+model.add(Dense(200, input_dim=550, activation='relu'))
+model.add(Dense(100, activation='relu'))
 model.add(Dense(5, activation='sigmoid'))
 model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-model.fit(X, Y, epochs=150, batch_size=10, verbose=0)
-predictions = (model.predict(X) > 0.5).astype(int)
-for i in range(5):
-	print((predictions[i], Y[i]))
+model.fit(X, Y, epochs=700, batch_size=10, verbose=0)
 
+tf_Idf_vector=[]
 
-statement = input("Please enter your statement :\n")
-#tokens=word_tokenize(statement)
-tokens = list(statement.split(" "))
+statement = input("Enter statement: ")
+User_Statement=[]
+User_Statement.append(statement)
+transformer = TfidfTransformer()
+Tfidf_vectorizer = TfidfVectorizer(decode_error="replace",vocabulary=pickle.load(open(TFIDF_Model_Path, "rb")))
+tf_Idf_vector = Tfidf_vectorizer.fit_transform(User_Statement).toarray()
+tf_Idf_vector=np.array(tf_Idf_vector)
+predictions=[]
+predictions = model(tf_Idf_vector)
+
+print(predictions)
+
+for row in predictions:
+    for i in range (0,len(row)):
+        print(row[i])
+        if row[i]>=0.08:
+            print(1)
+        else:
+            print(0)
 
 
