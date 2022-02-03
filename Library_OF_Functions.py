@@ -41,18 +41,37 @@ def Select_Block_Words(Blocks, No_Of_Blocks, Words_Tokens, addition, Block_word_
             New_Words_Tokens.append(Words_Tokens[i])
     return (New_Words_Tokens, Block_Start, Block_End)
 
+def Find_Duplicated_Patterns(List_Of_Needed_Patterns, df, Insert_F):
+    x,y=df.shape
+    Found=False
+        #List_Of_Needed_Patterns.append('0.5')
+    for i in range(x):
+        Lis=[]
+        for j in range(y):
+            Value=str(df.values[i][j])
+            if Value=='nan':
+                Lis.append('')
+            else:   
+                Lis.append(Value)
+        result =  all(elem in List_Of_Needed_Patterns for elem in Lis)
+        if (result):
+            Found=True
+            break    
+    return (Found)
 def Print_To_File(Non_Duplicated_Word_List, File_path_For_Patterns_Data, Insert_F):
         Block_Start=0
         Block_word_length=10
         Flag=True
         #Features_Str=[]
+        Update=False
         Block_End=0
         if Insert_F == True:
             CSV_Dataframe=pd.read_csv(File_path_For_Patterns_Data, sep=',', encoding='cp1252')
             Df_Row=pd.DataFrame(columns =["Pattern_1", "Pattern_2", "Pattern_3", "Pattern_4", "Pattern_5", "Pattern_6", "Pattern_7", "Pattern_8", "Pattern_9", "Pattern_10", "Matches"])
+    
         else:
             df = pd.DataFrame(columns =["Pattern_1", "Pattern_2", "Pattern_3", "Pattern_4", "Pattern_5", "Pattern_6", "Pattern_7", "Pattern_8", "Pattern_9", "Pattern_10", "Matches"])
-        while (Block_End<len(Non_Duplicated_Word_List) and Flag==True):
+        while (Block_End<len(Non_Duplicated_Word_List) and Flag==True and Block_End+4<len(Non_Duplicated_Word_List) ):
             Block_End=Block_Start+Block_word_length
             One_Feature=[]
             #Features_Str=[]
@@ -61,13 +80,17 @@ def Print_To_File(Non_Duplicated_Word_List, File_path_For_Patterns_Data, Insert_
                     One_Feature.append(Non_Duplicated_Word_List[j])
                 One_Feature.append('0.5')      
                 Block_Start= Block_End
-                if Insert_F == True :
-                    Df_Row=pd.DataFrame()
-                    Df_Row=Df_Row.append(pd.DataFrame([One_Feature],columns=["Pattern_1", "Pattern_2", "Pattern_3", "Pattern_4", "Pattern_5", "Pattern_6", "Pattern_7", "Pattern_8", "Pattern_9", "Pattern_10", "Matches"]), ignore_index=True)
-                    CSV_Dataframe = pd.concat([Df_Row, CSV_Dataframe]).reset_index(drop = True)
-
+                if(Insert_F):
+                    Found=Find_Duplicated_Patterns(One_Feature, CSV_Dataframe, Insert_F)
                 else:
-                    df=df.append(pd.DataFrame([One_Feature],columns=["Pattern_1", "Pattern_2", "Pattern_3", "Pattern_4", "Pattern_5", "Pattern_6", "Pattern_7", "Pattern_8", "Pattern_9", "Pattern_10", "Matches"]), ignore_index=True)
+                    Found=Find_Duplicated_Patterns(One_Feature, df, Insert_F)
+                if(Found==False):
+                    if Insert_F == True :
+                        Df_Row=pd.DataFrame()
+                        Df_Row=Df_Row.append(pd.DataFrame([One_Feature],columns=["Pattern_1", "Pattern_2", "Pattern_3", "Pattern_4", "Pattern_5", "Pattern_6", "Pattern_7", "Pattern_8", "Pattern_9", "Pattern_10", "Matches"]), ignore_index=True)
+                        CSV_Dataframe = pd.concat([Df_Row, CSV_Dataframe]).reset_index(drop = True)
+                    else:
+                        df=df.append(pd.DataFrame([One_Feature],columns=["Pattern_1", "Pattern_2", "Pattern_3", "Pattern_4", "Pattern_5", "Pattern_6", "Pattern_7", "Pattern_8", "Pattern_9", "Pattern_10", "Matches"]), ignore_index=True)
             else:
                 m=0
                 for j in range(Block_Start, len(Non_Duplicated_Word_List)):
@@ -79,14 +102,18 @@ def Print_To_File(Non_Duplicated_Word_List, File_path_For_Patterns_Data, Insert_
                         One_Feature.append('')
                     else:
                         One_Feature.append('0.5')
-                if Insert_F == True :
-                    Df_Row=pd.DataFrame()
-                    Df_Row=Df_Row.append(pd.DataFrame([One_Feature],columns=["Pattern_1", "Pattern_2", "Pattern_3", "Pattern_4", "Pattern_5", "Pattern_6", "Pattern_7", "Pattern_8", "Pattern_9", "Pattern_10", "Matches"]), ignore_index=True)
-                    CSV_Dataframe = pd.concat([Df_Row, CSV_Dataframe]).reset_index(drop = True)
-                    #CSV_Dataframe.to_csv(File_path_For_Patterns_Data, index=False)
+                if(Insert_F):
+                    Found=Find_Duplicated_Patterns(One_Feature, CSV_Dataframe, Insert_F)
                 else:
-                    df=df.append(pd.DataFrame([One_Feature],columns=["Pattern_1", "Pattern_2", "Pattern_3", "Pattern_4", "Pattern_5", "Pattern_6", "Pattern_7", "Pattern_8", "Pattern_9", "Pattern_10", "Matches"]), ignore_index=True)
-                    #df.to_csv(File_path_For_Patterns_Data, index=False)
+                    Found=Find_Duplicated_Patterns(One_Feature, df, Insert_F)
+                if(Found==False):
+                    if Insert_F == True :
+                        Df_Row=pd.DataFrame()
+                        Df_Row=Df_Row.append(pd.DataFrame([One_Feature],columns=["Pattern_1", "Pattern_2", "Pattern_3", "Pattern_4", "Pattern_5", "Pattern_6", "Pattern_7", "Pattern_8", "Pattern_9", "Pattern_10", "Matches"]), ignore_index=True)
+                        CSV_Dataframe = pd.concat([Df_Row, CSV_Dataframe]).reset_index(drop = True)
+                        #CSV_Dataframe.to_csv(File_path_For_Patterns_Data, index=False)
+                    else:
+                        df=df.append(pd.DataFrame([One_Feature],columns=["Pattern_1", "Pattern_2", "Pattern_3", "Pattern_4", "Pattern_5", "Pattern_6", "Pattern_7", "Pattern_8", "Pattern_9", "Pattern_10", "Matches"]), ignore_index=True)
                 Flag==False  
         if Insert_F == True :
             CSV_Dataframe.to_csv(File_path_For_Patterns_Data, index=False)
@@ -225,9 +252,10 @@ def Find_Patterns_Index_In_Sequence_Order(List_Of_Words_In_Order,index_Words_In_
                                 Class_Labels=Find_Classes_For_Data(Start_Block, End_Block, Words_List, Classes_Dataframe)
                                 Print_Class_Labels_Of_Text(Class_Labels, Classes_Dataframe, Datasets_Feautres_Dir_name)
                                 List_Of_Needed_Patterns=Extract_Parts_Of_Sentence(Start_Block, End_Block, Words_List)
-                                Print_List_Of_Needed_Patterns(List_Of_Needed_Patterns, Patterns_Data,'CSV_Patterns')
-                                Print_List_Of_Needed_Patterns(List_Of_Needed_Patterns, Patterns_Data, 'DOCX_Patterns')
-                                k=0
+                                if len(List_Of_Needed_Patterns)>=5:
+                                    Print_List_Of_Needed_Patterns(List_Of_Needed_Patterns, Patterns_Data,'CSV_Patterns')
+                                    Print_List_Of_Needed_Patterns(List_Of_Needed_Patterns, Patterns_Data, 'DOCX_Patterns')
+                                    k=0
                             while k>=0 and k<=Words_List_Index-1:
                                 Backup_List=[]
                                 Backup_List=Delete_One_by_One_Item_From_List(List_Of_Words_In_Order)
@@ -252,8 +280,9 @@ def Find_Patterns_Index_In_Sequence_Order(List_Of_Words_In_Order,index_Words_In_
                     Class_Labels=Find_Classes_For_Data(Start_Block, End_Block, Words_List, Classes_Dataframe)
                     Print_Class_Labels_Of_Text(Class_Labels, Classes_Dataframe, Datasets_Feautres_Dir_name)
                     List_Of_Needed_Patterns=Extract_Parts_Of_Sentence(Start_Block, End_Block, Words_List)
-                    Print_List_Of_Needed_Patterns(List_Of_Needed_Patterns, Patterns_Data,'CSV_Patterns')
-                    Print_List_Of_Needed_Patterns(List_Of_Needed_Patterns, Patterns_Data, 'DOCX_Patterns')
+                    if len(List_Of_Needed_Patterns)>=5:
+                        Print_List_Of_Needed_Patterns(List_Of_Needed_Patterns, Patterns_Data,'CSV_Patterns')
+                        Print_List_Of_Needed_Patterns(List_Of_Needed_Patterns, Patterns_Data, 'DOCX_Patterns')
                     
 def Find_Classes_For_Data(Start_Block, End_Block, Words_List, Classes_Dataframe):
     Li=[]
@@ -305,4 +334,3 @@ def Print_Class_Labels_Of_Text(Class_Labels, Classes_Dataframe, Datasets_Feautre
     Class_str=','.join([str(item) for item in Li])
     print (Class_str, file=File_Handle)
     File_Handle.close()
-            
